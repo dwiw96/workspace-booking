@@ -3,7 +3,7 @@
  * DI
  * Logging
  * web server
- */ 
+ */
 var builder = WebApplication.CreateBuilder(args); // init the builder
 
 // Add services to the container.
@@ -11,6 +11,7 @@ var builder = WebApplication.CreateBuilder(args); // init the builder
 builder.Services.AddControllers(); // Dependency injection for controller
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi(); // api document generator using OpenAPI format
+builder.Services.AddHealthChecks();
 
 var app = builder.Build(); // Build the app from the registered service and config
 
@@ -27,5 +28,7 @@ app.UseHttpsRedirection(); // Redirect http to https
 app.UseAuthorization(); // Authorization middleware, will be useful when we have [Authorize]
 
 app.MapControllers(); // Expose controller route in request pipeline via [Route] and http method
+
+app.MapHealthChecks("/health");
 
 app.Run();
