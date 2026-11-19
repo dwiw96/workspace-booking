@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using WorkspaceBooking.Api.Data;
+
 /*
  * Read configuration from appsetting.json, env variables, and cli args
  * DI
@@ -13,6 +16,19 @@ builder.Services.AddControllers(); // Dependency injection for controller
 builder.Services.AddOpenApi(); // api document generator using OpenAPI format
 builder.Services.AddHealthChecks();
 
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+}
+
+builder.Services.AddDbContext<WorkspaceBookingDbContext>(options =>
+{
+    options.UseNpgsql(connectionString);
+    options.UseSnakeCaseNamingConvention(); // Use snake_case for table and column names
+});
+
 var app = builder.Build(); // Build the app from the registered service and config
 
 // Configure the HTTP request pipeline.
@@ -23,11 +39,9 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection(); // Redirect http to https
+app.UseHttpsRedirection();
 
-app.UseAuthorization(); // Authorization middleware, will be useful when we have [Authorize]
-
-app.MapControllers(); // Expose controller route in request pipeline via [Route] and http method
+app.MapControllers();
 
 app.MapHealthChecks("/health");
 
